@@ -50,7 +50,7 @@ jobs:
       - name: Zip published output
         run: |
           if (Test-Path -Path src\sample-eval\bin\*) {
-            Compress-Archive -Path src\sample-eval\bin\Release\* -DestinationPath dotnet-app.zip
+            Compress-Archive -Path src\sample-eval\bin\* -DestinationPath dotnet-app.zip
           } else {
             Write-Error "Build output not found. Check build logs."
           }
