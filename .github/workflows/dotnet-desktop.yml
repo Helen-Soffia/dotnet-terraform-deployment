@@ -28,11 +28,13 @@ jobs:
 
       - name: Build the solution
         run: |
-          "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release
+          "& 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe' 'src/sample-eval.sln' /p:Configuration=Release"
+        shell: pwsh
 
       - name: Zip published output
         run: |
-          Compress-Archive -Path src\sample-eval\bin\Release\ -DestinationPath dotnet-app.zip
+          Compress-Archive -Path src\sample-eval\bin\Release\* -DestinationPath dotnet-app.zip
+        shell: pwsh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
