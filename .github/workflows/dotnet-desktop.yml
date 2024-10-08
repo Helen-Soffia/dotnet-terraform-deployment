@@ -26,9 +26,20 @@ jobs:
         run: |
           choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
 
-      - name: Build the solution
+      - name: Build the solution with detailed logs
         run: |
-          "& 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe' 'src/sample-eval.sln' /p:Configuration=Release"
+          "& 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe' 'src/sample-eval.sln' /p:Configuration=Release /p:Platform=\"Any CPU\" /verbosity:diagnostic /fileLogger /fileLoggerParameters:LogFile=msbuild.log"
+        shell: pwsh
+
+      - name: Display MSBuild log if build fails
+        if: failure()
+        run: |
+          Get-Content -Path msbuild.log -Raw
+        shell: pwsh
+
+      - name: List all files in the solution directory
+        run: |
+          Get-ChildItem -Recurse -Force src
         shell: pwsh
 
       - name: Zip published output
