@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -o
+
 # Navigate to the project directory
 cd src/
 
