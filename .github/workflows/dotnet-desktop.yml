@@ -28,7 +28,7 @@ jobs:
 
       - name: Build the solution with detailed logs
         run: |
-          "& 'C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe' 'src/sample-eval.sln' /p:Configuration=Release /p:Platform=\"Any CPU\" /verbosity:diagnostic /fileLogger /fileLoggerParameters:LogFile=msbuild.log"
+          & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:Platform="Any CPU" /verbosity:detailed /fileLogger /fileLoggerParameters:LogFile=msbuild.log
         shell: pwsh
 
       - name: Display MSBuild log if build fails
