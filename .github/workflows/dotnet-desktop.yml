@@ -13,19 +13,24 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Install MSBuild
+    - name: Install Visual Studio Build Tools
       run: |
         choco install visualstudio2019buildtools --include-optional --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --norestart"
-        $env:Path += ";C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
-    
+
+    - name: Verify MSBuild installation
+      run: |
+        & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" -version
+
     - name: Setup NuGet
       run: nuget restore src/sample-eval.sln
 
     - name: Build Application
-      run: msbuild src/sample-eval.sln /p:Configuration=Release
+      run: |
+        & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release
 
     - name: Publish Application
-      run: msbuild src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageLocation=./publish
+      run: |
+        & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageLocation=./publish
 
     - name: Zip Published Files
       run: Compress-Archive -Path ./publish/* -DestinationPath dotnet-app.zip
