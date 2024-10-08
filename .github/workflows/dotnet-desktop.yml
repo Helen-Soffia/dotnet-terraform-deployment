@@ -13,6 +13,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
+    - name: Install MSBuild
+      run: |
+        choco install visualstudio2019buildtools --include-optional --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --quiet --norestart"
+        export PATH="$PATH:/C/Program Files (x86)/Microsoft Visual Studio/2019/BuildTools/MSBuild/Current/Bin"
+    
     - name: Setup NuGet
       run: nuget restore src/sample-eval.sln
 
