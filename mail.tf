@@ -1,24 +1,17 @@
 provider "aws" {
-  region = "us-east-1"
-}
-
-# Archive your .NET 4.8 application
-data "archive_file" "app_zip" {
-  type        = "zip"
-  source_dir  = "src/" 
-  output_path = "${path.module}/dotnet-app.zip" 
+  region = "us-east-1"  # Change to your AWS region
 }
 
 # Create an S3 bucket for storing the application bundle
 resource "aws_s3_bucket" "app_bucket" {
-  bucket = "my-dotnet-app-bucket"
+  bucket = "my-dotnet-app-bucket"  # Change this to a unique bucket name
 }
 
-# Upload the zipped application to S3
-resource "aws_s3_bucket_object" "app_version" {
+# Upload the zipped application to S3 using the new resource
+resource "aws_s3_object" "app_version" {
   bucket = aws_s3_bucket.app_bucket.bucket
-  key    = "dotnet-app.zip"
-  source = data.archive_file.app_zip.output_path 
+  key    = "dotnet-app.zip"  # The name of the file in the S3 bucket
+  source = "dotnet-app.zip"  # Source is the zipped file created above
 }
 
 # Create an Elastic Beanstalk Application
@@ -29,22 +22,27 @@ resource "aws_elastic_beanstalk_application" "dotnet_app" {
 
 # Create an Elastic Beanstalk Application Version
 resource "aws_elastic_beanstalk_application_version" "app_version" {
-  name        = "v1"
+  name        = "v1-${timestamp()}"  # Use a unique version name
   application = aws_elastic_beanstalk_application.dotnet_app.name
   bucket      = aws_s3_bucket.app_bucket.bucket
-  key         = aws_s3_bucket_object.app_version.key
+  key         = aws_s3_object.app_version.key
 }
 
-# Create an Elastic Beanstalk Environment
 resource "aws_elastic_beanstalk_environment" "dotnet_environment" {
   name                = "DotNetEnv"
-  application         = aws_elastic_beanstalk_application.dotnet_app.name
-  solution_stack_name = "64bit Windows Server 2019 v2.8.0 running IIS 10.0"  # For .NET Framework 4.8 on Windows
+  application         = aws_elastic_beanstalk_application.dotnet_app.id
+  solution_stack_name = "64bit Windows Server 2019 v2.15.5 running IIS 10.0"
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
-    value     = "t3.medium" 
+    value     = "t3.medium"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "IamInstanceProfile"
+    value     = aws_iam_instance_profile.eb_profile.arn
   }
 
   setting {
@@ -56,11 +54,12 @@ resource "aws_elastic_beanstalk_environment" "dotnet_environment" {
   version_label = aws_elastic_beanstalk_application_version.app_version.name
 }
 
-# IAM Role for Elastic Beanstalk (if needed)
+# Reference the existing IAM Role
+data "aws_iam_role" "existing_eb_role" {
+  name = "aws-elasticbeanstalk-ec2-role"
+}
+
 resource "aws_iam_instance_profile" "eb_profile" {
   name = "eb-instance-profile"
-  
-  role {
-    name = "aws-elasticbeanstalk-ec2-role"
-  }
+  role = data.aws_iam_role.existing_eb_role.name
 }
