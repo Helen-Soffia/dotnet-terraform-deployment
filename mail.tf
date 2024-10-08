@@ -2,17 +2,26 @@ provider "aws" {
   region = "us-east-1"  # Change to your AWS region
 }
 
-# Create an S3 bucket for storing the application bundle
-resource "aws_s3_bucket" "app_bucket" {
-  bucket = "my-dotnet-app-bucket"  # Change this to a unique bucket name
+variable "app_s3_bucket" {}
+variable "app_s3_key" {}
+
+resource "aws_s3_bucket_object" "app_version" {
+  bucket = var.app_s3_bucket
+  key    = var.app_s3_key
+  source = "dotnet-app.zip"
 }
 
-# Upload the zipped application to S3 using the new resource
-resource "aws_s3_object" "app_version" {
-  bucket = aws_s3_bucket.app_bucket.bucket
-  key    = "dotnet-app.zip"  # The name of the file in the S3 bucket
-  source = "dotnet-app.zip"  # Source is the zipped file created above
-}
+# # Create an S3 bucket for storing the application bundle
+# resource "aws_s3_bucket" "app_bucket" {
+#   bucket = "my-dotnet-app-bucket"  # Change this to a unique bucket name
+# }
+
+# # Upload the zipped application to S3 using the new resource
+# resource "aws_s3_object" "app_version" {
+#   bucket = aws_s3_bucket.app_bucket.bucket
+#   key    = "dotnet-app.zip"  # The name of the file in the S3 bucket
+#   source = "dotnet-app.zip"  # Source is the zipped file created above
+# }
 
 # Create an Elastic Beanstalk Application
 resource "aws_elastic_beanstalk_application" "dotnet_app" {
