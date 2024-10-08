@@ -1,0 +1,32 @@
+name: Build and Deploy .NET Framework App
+
+on:
+  push:
+    branches:
+      - main  # Change this to your default branch
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup NuGet
+      run: nuget restore src/sample-eval.sln
+
+    - name: Build Application
+      run: msbuild src/sample-eval.sln /p:Configuration=Release
+
+    - name: Publish Application
+      run: msbuild src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageLocation=./publish
+
+    - name: Zip Published Files
+      run: Compress-Archive -Path ./publish/* -DestinationPath dotnet-app.zip
+
+    - name: Upload to S3
+      run: aws s3 cp dotnet-app.zip s3://my-dotnet-app-bucket/
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
