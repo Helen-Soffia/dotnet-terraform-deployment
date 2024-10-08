@@ -33,7 +33,11 @@ jobs:
 
       - name: Zip published output
         run: |
-          Compress-Archive -Path src\sample-eval\bin\Release\* -DestinationPath dotnet-app.zip
+          if (Test-Path -Path src\sample-eval\bin\Release\*) {
+            Compress-Archive -Path src\sample-eval\bin\Release\* -DestinationPath dotnet-app.zip
+          } else {
+            Write-Error "Build output not found. Check build logs."
+          }
         shell: pwsh
 
       - name: Upload build artifacts
