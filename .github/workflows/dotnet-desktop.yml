@@ -53,7 +53,7 @@ jobs:
 
       - name: Zip published output
         run: |
-          Compress-Archive -Path ${{ github.workspace }}\build_output\* -DestinationPath ${{ github.workspace }}\build_output.zip
+          Compress-Archive -Path ${{ github.workspace }}\build_output\* -DestinationPath ${{ github.workspace }}\build_output.zip  -Recurse
         shell: pwsh
 
       - name: Upload build artifacts
