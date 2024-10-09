@@ -51,6 +51,11 @@ jobs:
           Get-ChildItem -Recurse -Force build_output/
         shell: pwsh
 
+      - name: Display build output directory contents
+        run: |
+          ls -la ${{ github.workspace }}\build_output
+        shell: pwsh
+
       - name: Zip published output
         run: |
           Compress-Archive -Path ${{ github.workspace }}\build_output\* -DestinationPath ${{ github.workspace }}\build_output.zip 
