@@ -31,32 +31,22 @@ jobs:
           & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="src/sample-eval/publish"
         shell: pwsh
 
-
       - name: Display MSBuild log if build fails
         if: failure()
         run: |
           Get-Content -Path msbuild.log -Raw
         shell: pwsh
 
-      - name: List all files in the publish directory
+      - name: List files in the publish directory
         run: |
-          Get-ChildItem -Recurse -Force src/sample-eval/publish
-        shell: pwsh
-
-      - name: Zip published output
-        run: |
-          if (Test-Path -Path "src/sample-eval/src/sample-eval/publish/*") {
-            Compress-Archive -Path "src/sample-eval/src/sample-eval/publish/*" -DestinationPath dotnet-app.zip
-          } else {
-            Write-Error "Publish output not found. Check build logs."
-          }
+          Get-ChildItem -Recurse -Force src/sample-eval/src/sample-eval/publish
         shell: pwsh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dotnet-app
-          path: dotnet-app.zip
+          path: src/sample-eval/src/sample-eval/publish/sample-eval.zip
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -66,4 +56,4 @@ jobs:
           aws-region: us-east-1
       
       - name: Upload to S3
-        run: aws s3 cp dotnet-app.zip s3://dotnet-sample-github/dotnet-app.zip
+        run: aws s3 cp src/sample-eval/src/sample-eval/publish/sample-eval.zip s3://dotnet-sample-github/sample-eval.zip
