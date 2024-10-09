@@ -25,14 +25,10 @@ jobs:
       - name: Install Visual Studio Build Tools (with Web Build Tools)
         run: |
           choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
-          
-      - name: Create output directory
-        run: |
-          mkdir -p ${{ github.workspace }}\build_output
       
-      - name: Build the solution with detailed logs
+      - name: Publish the solution
         run: |
-          & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:Platform="Any CPU" /p:OutDir=${{ github.workspace }}\build_output\ /verbosity:detailed /fileLogger /fileLoggerParameters:LogFile=msbuild.log
+          & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="src/sample-eval/publish"
         shell: pwsh
 
       - name: Display MSBuild log if build fails
@@ -41,31 +37,25 @@ jobs:
           Get-Content -Path msbuild.log -Raw
         shell: pwsh
 
-      - name: List all files in the solution directory
+      - name: List all files in the publish directory
         run: |
-          Get-ChildItem -Recurse -Force src
-        shell: pwsh
-        
-      - name: List all files in the solution build output
-        run: |
-          Get-ChildItem -Recurse -Force build_output/
-        shell: pwsh
-
-      - name: Display build output directory contents
-        run: |
-          ls -la ${{ github.workspace }}\build_output
+          Get-ChildItem -Recurse -Force src/sample-eval/publish
         shell: pwsh
 
       - name: Zip published output
         run: |
-          Compress-Archive -Path ${{ github.workspace }}\build_output\* -DestinationPath ${{ github.workspace }}\build_output.zip 
+          if (Test-Path -Path src/sample-eval/publish\*) {
+            Compress-Archive -Path src/sample-eval/publish\* -DestinationPath dotnet-app.zip
+          } else {
+            Write-Error "Publish output not found. Check build logs."
+          }
         shell: pwsh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: dotnet-app
-          path: ${{ github.workspace }}\build_output.zip
+          path: dotnet-app.zip
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -75,7 +65,7 @@ jobs:
           aws-region: us-east-1  # Adjust this if needed
 
       - name: Upload to S3
-        run: aws s3 cp ${{ github.workspace }}\build_output.zip s3://dotnet-sample-github/dotnet-app.zip
+        run: aws s3 cp dotnet-app.zip s3://dotnet-sample-github/dotnet-app.zip
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
