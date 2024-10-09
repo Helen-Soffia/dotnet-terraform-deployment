@@ -45,8 +45,8 @@ jobs:
 
       - name: Zip published output
         run: |
-          if (Test-Path -Path src/sample-eval/publish/*) {
-            Compress-Archive -Path src/sample-eval/publish/* -DestinationPath dotnet-app.zip
+          if (Test-Path -Path "src/sample-eval/src/sample-eval/publish/*") {
+            Compress-Archive -Path "src/sample-eval/src/sample-eval/publish/*" -DestinationPath dotnet-app.zip
           } else {
             Write-Error "Publish output not found. Check build logs."
           }
@@ -57,25 +57,13 @@ jobs:
         with:
           name: dotnet-app
           path: dotnet-app.zip
-
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1  # Adjust this if needed
-
+          aws-region: us-east-1
+      
       - name: Upload to S3
         run: aws s3 cp dotnet-app.zip s3://dotnet-sample-github/dotnet-app.zip
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Terraform Plan
-        run: terraform plan -var="app_s3_bucket=dotnet-sample-github" -var="app_s3_key=dotnet-app.zip"
-      
-      - name: Terraform Apply
-        run: terraform apply -var="app_s3_bucket=dotnet-sample-github" -var="app_s3_key=dotnet-app.zip" -auto-approve
