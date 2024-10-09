@@ -26,10 +26,11 @@ jobs:
         run: |
           choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
       
-      - name: Publish the solution
+      - name: Publish the solution using MSBuild
         run: |
           & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" src/sample-eval.sln /p:Configuration=Release /p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="src/sample-eval/publish"
         shell: pwsh
+
 
       - name: Display MSBuild log if build fails
         if: failure()
@@ -44,8 +45,8 @@ jobs:
 
       - name: Zip published output
         run: |
-          if (Test-Path -Path src/sample-eval/publish\*) {
-            Compress-Archive -Path src/sample-eval/publish\* -DestinationPath dotnet-app.zip
+          if (Test-Path -Path src/sample-eval/publish/*) {
+            Compress-Archive -Path src/sample-eval/publish/* -DestinationPath dotnet-app.zip
           } else {
             Write-Error "Publish output not found. Check build logs."
           }
