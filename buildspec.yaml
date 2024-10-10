@@ -9,9 +9,6 @@ phases:
   install:
     runtime-versions:
       dotnet: 4.8
-    commands:
-      - choco install nuget.commandline -y
-      - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart" -y
 
   pre_build:
     commands:
@@ -28,15 +25,7 @@ phases:
         /p:SkipInvalidConfigurations=true `
         /p:PackageLocation="$env:PACKAGE_LOCATION"
 
-  post_build:
-    commands:
-      - aws s3 cp $env:PACKAGE_LOCATION/sample-eval.zip s3://dotnet-sample-github/sample-eval.zip
-
 artifacts:
   files:
     - $env:PACKAGE_LOCATION/sample-eval.zip
   name: dotnet-app
-
-cache:
-  paths:
-    - "/root/.nuget/packages/**/*"
