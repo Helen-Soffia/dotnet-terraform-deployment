@@ -25,12 +25,12 @@ phases:
         /p:SkipInvalidConfigurations=true `
         /p:PackageLocation="$env:PACKAGE_LOCATION" `
         /verbosity:detailed
-      - tree $env:PACKAGE_LOCATION
-      - zip -r $env:PACKAGE_LOCATION\sample-eval.zip $env:PACKAGE_LOCATION
+      - tree '.\src\sample-eval\'
+      - Get-ChildItem -Path '.\src\sample-eval\'  -Recurse -Force -Filter "*.zip"
 
 artifacts:
   files:
-    - $env:PACKAGE_LOCATION/sample-eval.zip
+    - $env:PACKAGE_LOCATION\sample-eval.zip
   name: dotnet-app
   discard-paths: yes
 
