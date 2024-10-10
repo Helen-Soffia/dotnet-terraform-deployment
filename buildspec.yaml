@@ -9,6 +9,9 @@ phases:
   install:
     runtime-versions:
       dotnet: 4.8
+    commands:
+      - choco install nuget.commandline -y
+      - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --add Microsoft.Net.Component.4.8.SDK --add Microsoft.Net.Component.4.8.TargetingPack --quiet --norestart --force" -y
 
   pre_build:
     commands:
@@ -23,9 +26,21 @@ phases:
         /p:WebPublishMethod=Package `
         /p:PackageAsSingleFile=true `
         /p:SkipInvalidConfigurations=true `
-        /p:PackageLocation="$env:PACKAGE_LOCATION"
+        /p:PackageLocation="$env:PACKAGE_LOCATION" `
+        /verbosity:detailed
+
+  post_build:
+    commands:
+      - |
+        if (Test-Path "$env:PACKAGE_LOCATION\sample-eval.zip") {
+          aws s3 cp "$env:PACKAGE_LOCATION\sample-eval.zip" s3://dotnet-sample-github/sample-eval.zip
+        } else {
+          Write-Host "Build artifact not found. Skipping S3 upload."
+          exit 1
+        }
 
 artifacts:
   files:
-    - $env:PACKAGE_LOCATION/sample-eval.zip
+    - $env:PACKAGE_LOCATION\sample-eval.zip
   name: dotnet-app
+  discard-paths: yes
