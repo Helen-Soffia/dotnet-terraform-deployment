@@ -10,7 +10,7 @@ phases:
     runtime-versions:
       dotnet: 4.8
     commands:
-      -   choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
+      - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart" --force -y
 
   pre_build:
     commands:
@@ -19,7 +19,7 @@ phases:
   build:
     commands:
       - |
-        & "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe" $env:SOLUTION_FILE `
+        & msbuild $env:SOLUTION_FILE `
         /p:Configuration=Release `
         /p:DeployOnBuild=true `
         /p:WebPublishMethod=Package `
@@ -27,16 +27,6 @@ phases:
         /p:SkipInvalidConfigurations=true `
         /p:PackageLocation="$env:PACKAGE_LOCATION" `
         /verbosity:detailed
-
-  post_build:
-    commands:
-      - |
-        if (Test-Path "$env:PACKAGE_LOCATION\sample-eval.zip") {
-          aws s3 cp "$env:PACKAGE_LOCATION\sample-eval.zip" s3://dotnet-sample-github/sample-eval.zip
-        } else {
-          Write-Host "Build artifact not found. Skipping S3 upload."
-          exit 1
-        }
 
 artifacts:
   files:
