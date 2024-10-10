@@ -10,7 +10,7 @@ phases:
     runtime-versions:
       dotnet: 4.8
     commands:
-      - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart" --force -y
+      -   choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart"
 
   pre_build:
     commands:
@@ -43,3 +43,7 @@ artifacts:
     - $env:PACKAGE_LOCATION\sample-eval.zip
   name: dotnet-app
   discard-paths: yes
+
+cache:
+  paths:
+    - 'C:\Users\ContainerAdministrator\.nuget\packages\**\*'
