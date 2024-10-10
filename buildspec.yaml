@@ -2,15 +2,13 @@ version: 0.2
 
 env:
   variables:
-    SOLUTION_FILE: "src/sample-eval.sln"
-    PACKAGE_LOCATION: "src/sample-eval/publish"
+    SOLUTION_FILE: "src\\sample-eval.sln"
+    PACKAGE_LOCATION: "src\\sample-eval\\publish"
 
 phases:
   install:
     runtime-versions:
       dotnet: 4.8
-    commands:
-      - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.WebBuildTools --quiet --norestart" --force -y
 
   pre_build:
     commands:
@@ -27,6 +25,8 @@ phases:
         /p:SkipInvalidConfigurations=true `
         /p:PackageLocation="$env:PACKAGE_LOCATION" `
         /verbosity:detailed
+      - tree $env:PACKAGE_LOCATION
+      - zip -r $env:PACKAGE_LOCATION\sample-eval.zip $env:PACKAGE_LOCATION
 
 artifacts:
   files:
