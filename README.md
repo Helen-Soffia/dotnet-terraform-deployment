@@ -14,85 +14,101 @@ This repository demonstrates how to deploy a .NET Framework 4.8 application usin
 
 Before you begin, ensure you have the following installed:
 
-- **.NET Framework 4.8 SDK** (for building the application)
-- **AWS CLI** (for managing AWS services)
-- **Terraform** (for managing infrastructure as code)
-- **Git** (for version control)
+- .NET Framework 4.8 SDK (for building the application)
+- AWS CLI (for managing AWS services)
+- Terraform (for managing infrastructure as code)
+- Git (for version control)
 
-You also need an AWS account and S3 bucket to store the application package.
+You also need an AWS account and an S3 bucket to store the application package.
 
 ## Setup
 
-1. **Clone the repository:**
+1. Clone the repository:
 
-   ```bash
-   git clone https://github.com/Helen-Soffia/dotnet-terraform-deployment.git
-   cd dotnet-terraform-deployment
-Install Terraform:
+    ```bash
+    git clone https://github.com/Helen-Soffia/dotnet-terraform-deployment.git
+    cd dotnet-terraform-deployment
+    ```
 
-Follow the official Terraform installation guide to install Terraform on your machine.
+2. Install Terraform:
 
-Set up AWS CLI:
+    Follow the official [Terraform installation guide](https://learn.hashicorp.com/tutorials/terraform/install-cli) to install Terraform on your machine.
 
-Configure the AWS CLI with your credentials:
+3. Set up AWS CLI:
 
-bash
-Copy code
-aws configure
-Install .NET Framework SDK:
+    Configure the AWS CLI with your credentials:
 
-If you haven't already, download and install the .NET Framework 4.8 SDK from Microsoft's website.
+    ```bash
+    aws configure
+    ```
 
-Deployment
-Step 1: Build and package the .NET application
-Open a terminal in the project root and build the application:
+4. Install .NET Framework SDK:
 
-bash
-Copy code
-dotnet build
-Publish the application:
+    If you haven't already, download and install the .NET Framework 4.8 SDK from Microsoft's website.
 
-bash
-Copy code
-dotnet publish -c Release
-Zip the published output:
+## Deployment
 
-bash
-Copy code
-zip -r app.zip ./bin/Release/net48/publish/
-Upload the zip file to your S3 bucket:
+### Step 1: Build and Package the .NET Application
 
-bash
-Copy code
-aws s3 cp app.zip s3://your-s3-bucket-name/app.zip
-Step 2: Deploy using Terraform
-Navigate to the Terraform directory:
+1. Open a terminal in the project root and build the application:
 
-bash
-Copy code
-cd terraform
-Initialize Terraform:
+    ```bash
+    dotnet build
+    ```
 
-bash
-Copy code
-terraform init
-Plan the deployment:
+2. Publish the application:
 
-bash
-Copy code
-terraform plan
-Apply the Terraform configuration:
+    ```bash
+    dotnet publish -c Release
+    ```
 
-bash
-Copy code
-terraform apply
-This will create the necessary AWS Elastic Beanstalk environment and deploy the application from your S3 bucket.
+3. Zip the published output:
 
-Step 3: Verify the Deployment
+    ```bash
+    zip -r app.zip ./bin/Release/net48/publish/
+    ```
+
+4. Upload the zip file to your S3 bucket:
+
+    ```bash
+    aws s3 cp app.zip s3://your-s3-bucket-name/app.zip
+    ```
+
+### Step 2: Deploy Using Terraform
+
+1. Navigate to the Terraform directory:
+
+    ```bash
+    cd terraform
+    ```
+
+2. Initialize Terraform:
+
+    ```bash
+    terraform init
+    ```
+
+3. Plan the deployment:
+
+    ```bash
+    terraform plan
+    ```
+
+4. Apply the Terraform configuration:
+
+    ```bash
+    terraform apply
+    ```
+
+    This will create the necessary AWS Elastic Beanstalk environment and deploy the application from your S3 bucket.
+
+### Step 3: Verify the Deployment
+
 Once Terraform finishes applying the changes, you can access your .NET application via the URL provided by Elastic Beanstalk. You can view the output in your terminal.
 
-Terraform Directory Structure
-main.tf: Main Terraform configuration file defining AWS resources.
-variables.tf: Contains variables used throughout the Terraform configuration.
-outputs.tf: Defines outputs like the URL of the Elastic Beanstalk environment.
-provider.tf: Configures the AWS provider for Terraform
+## Terraform Directory Structure
+
+- `main.tf`: Main Terraform configuration file defining AWS resources.
+- `variables.tf`: Contains variables used throughout the Terraform configuration.
+- `outputs.tf`: Defines outputs like the URL of the Elastic Beanstalk environment.
+- `provider.tf`: Configures the AWS provider for Terraform.
