@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     SOLUTION_FILE: "src\\sample-eval.sln"
-    PACKAGE_LOCATION: "src\\sample-eval\\publish"
+    PACKAGE_LOCATION: "publish"
 
 phases:
   install:
@@ -30,7 +30,7 @@ phases:
 
 artifacts:
   files:
-    - $env:PACKAGE_LOCATION\sample-eval.zip
+    - "**/*.zip"
   name: dotnet-app
   discard-paths: yes
 
