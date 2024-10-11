@@ -30,9 +30,8 @@ phases:
 
 artifacts:
   files:
-    - "**/*.zip"
+    - src\sample-eval\$env:PACKAGE_LOCATION\sample-eval.zip
   name: dotnet-app
-  discard-paths: yes
 
 cache:
   paths:
