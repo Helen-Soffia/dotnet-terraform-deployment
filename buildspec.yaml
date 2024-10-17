@@ -21,7 +21,7 @@ phases:
         /p:Configuration=Release `
         /p:DeployOnBuild=true `
         /p:WebPublishMethod=Package `
-        /p:PackageAsSingleFile=true `
+        /p:PackageAsSingleFile=false `
         /p:SkipInvalidConfigurations=true `
         /p:PackageLocation="$env:PACKAGE_LOCATION" `
         /verbosity:detailed
@@ -30,8 +30,9 @@ phases:
 
 artifacts:
   files:
-    - src\sample-eval\$env:PACKAGE_LOCATION\sample-eval.zip
-  discard-paths: yes
+    - src\sample-eval\$env:PACKAGE_LOCATION\**\*
+  name: sample-eval
+  discard-paths: no
 
 cache:
   paths:
