@@ -80,3 +80,6 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+
+# EC2 Instance Key
+*.pem

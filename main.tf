@@ -129,6 +129,71 @@ resource "aws_route_table_association" "private_2" {
   route_table_id = aws_route_table.private.id
 }
 
+# Security Group for EC2 instances
+resource "aws_security_group" "ec2_sg" {
+  name        = "eb-ec2-sg"
+  description = "Security group for Elastic Beanstalk EC2 instances"
+  vpc_id      = aws_vpc.main.id
+
+  # Allow outbound traffic to anywhere
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "eb-ec2-sg"
+  }
+}
+
+# Security Group for ELB
+resource "aws_security_group" "elb_sg" {
+  name        = "eb-elb-sg"
+  description = "Security group for Elastic Beanstalk ELB"
+  vpc_id      = aws_vpc.main.id
+
+  # Allow inbound HTTP traffic
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow inbound HTTPS traffic
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "eb-elb-sg"
+  }
+}
+
+# Security Group Rule to allow traffic from ELB to EC2
+resource "aws_security_group_rule" "elb_to_ec2_in" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.elb_sg.id
+  security_group_id        = aws_security_group.ec2_sg.id
+}
+
+resource "aws_security_group_rule" "elb_to_ec2_out" {
+  type                     = "egress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.ec2_sg.id
+  security_group_id        = aws_security_group.elb_sg.id
+}
+
 # IAM role for EC2 instances
 resource "aws_iam_role" "ec2_role" {
   name = "aws-elasticbeanstalk-ec2-role-terraform"
@@ -162,6 +227,12 @@ resource "aws_iam_role_policy_attachment" "worker_tier" {
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "aws-elasticbeanstalk-ec2-role-terraform"
   role = aws_iam_role.ec2_role.name
+}
+
+# Create a key pair
+resource "aws_key_pair" "deployer" {
+  key_name   = "devops-key"
+  public_key = file("${path.module}/devops.pem.pub") # Replace with the path to your public key file
 }
 
 # Elastic Beanstalk application
@@ -210,6 +281,26 @@ resource "aws_elastic_beanstalk_environment" "dotnet_env" {
     value     = "false"
   }
 
+  # Apply EC2 security group
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "SecurityGroups"
+    value     = aws_security_group.ec2_sg.id
+  }
+
+  # Apply ELB security group
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "SecurityGroups"
+    value     = aws_security_group.elb_sg.id
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "EC2KeyName"
+    value     = aws_key_pair.deployer.key_name
+  }
+
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
@@ -226,6 +317,12 @@ resource "aws_elastic_beanstalk_environment" "dotnet_env" {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "RootVolumeType"
     value     = "gp3"
+  }
+
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "RootVolumeSize"
+    value     = "60"
   }
 
   setting {
@@ -250,6 +347,32 @@ resource "aws_elastic_beanstalk_environment" "dotnet_env" {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ENVIRONMENT"
     value     = "production"
+  }
+
+  # SSL Configuration
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "InstancePort"
+    value     = 80
+  }
+
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "SSLCertificateId"
+    value     = "arn:aws:acm:us-east-1:825765409649:certificate/80f280b6-f74f-47ae-b171-5b9d2709f0d4" # Replace with your SSL certificate ARN
+  }
+
+  # Optional: Redirect HTTP to HTTPS
+  setting {
+    namespace = "aws:elb:listener:80"
+    name      = "ListenerEnabled"
+    value     = "false"
   }
 
   # Load Balancer configuration
