@@ -32,7 +32,7 @@ artifacts:
   files:
     - src\sample-eval\$env:PACKAGE_LOCATION\**\*
   name: sample-eval
-  discard-paths: no
+  discard-paths: yes
 
 cache:
   paths:
