@@ -26,11 +26,11 @@ phases:
         /p:PackageLocation="$env:PACKAGE_LOCATION" `
         /verbosity:detailed
       - tree '.\src\sample-eval\'
-      - Get-ChildItem -Path '.\src\sample-eval\'  -Recurse -Force -Filter "*.zip"
+      - Get-ChildItem -Path '.\src\sample-eval\'  -Recurse -Force -Filter "Archive"
 
 artifacts:
   files:
-    - src\sample-eval\$env:PACKAGE_LOCATION\Archive\**\*
+    - '**\*'
   base-directory: src\sample-eval\$env:PACKAGE_LOCATION\Archive
   name: sample-eval
   discard-paths: no
