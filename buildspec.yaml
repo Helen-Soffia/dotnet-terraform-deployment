@@ -30,9 +30,10 @@ phases:
 
 artifacts:
   files:
-    - src\sample-eval\$env:PACKAGE_LOCATION\**\*
+    - src\sample-eval\$env:PACKAGE_LOCATION\Archive\**\*
+  base-directory: src\sample-eval\$env:PACKAGE_LOCATION\Archive
   name: sample-eval
-  discard-paths: yes
+  discard-paths: no
 
 cache:
   paths:
